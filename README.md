@@ -180,3 +180,17 @@ READMEs describe additional tests for their supported apps.
 
 Exit status `0` means the requested operation succeeded; `1` means an argument,
 validation, build or output error. Errors are printed to standard error.
+
+## Acknowledgements
+
+patch-ipa-duo was developed independently, with research and inspiration from several projects exploring iPad application compatibility and iOS device behaviour.
+
+Special thanks to:
+
+- **[DuoSDK](https://www.reddit.com/r/sideloaded/comments/1xvhqh4/release_experimental_duo_sdk_remove_the_black/)** — For its research into SDK-version handling and application compatibility through LaunchServices.
+- **[TrollPad](https://github.com/khanhduytran0/TrollPad)** — For exploring iPad-style functionality and device interface identity on iPhones.
+- **[iPadify by Guilherme Rambo](https://repo.packix.com/package/codes.rambo.ipadify)** — For pioneering work enabling iPad-specific functionality on iPhones.
+
+These projects provided valuable technical references during development.
+
+Acknowledgement does not imply affiliation with or endorsement by the original developers.
