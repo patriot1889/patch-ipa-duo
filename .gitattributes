@@ -1,0 +1,7 @@
+* text=auto
+*.py text eol=lf
+*.m text eol=lf
+*.swift text eol=lf
+*.json text eol=lf
+patch-ipa-duo text eol=lf
+*.dylib binary

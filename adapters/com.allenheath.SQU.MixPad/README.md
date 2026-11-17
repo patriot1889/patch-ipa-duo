@@ -2,10 +2,11 @@
 
 Supports `com.allenheath.SQU.MixPad`, version `1.60.1`, build `1.60.1.92418`
 (the app marketed as 1.6.1). All adapter-specific rules and source live here.
-The main patcher supplies shared archive validation, source compilation, SDK
-changes and dylib injection.
+The main patcher supplies shared archive validation, prebuilt-library selection
+(or macOS source compilation), SDK changes and dylib injection.
 
-Run these commands from the repository root:
+Run these commands from the repository root. On Windows replace
+`./patch-ipa-duo` with `py -3 .\patch-ipa-duo.py`:
 
 ```sh
 ./patch-ipa-duo inspect com.allenheath.SQU.MixPad-1.6.1.ipa
@@ -43,8 +44,10 @@ keeps popup/native-window geometry separate. Disconnect clears scene association
 so the same Qt UI can reconnect. iOS 26+ uses effective scene geometry, with a
 coordinate-space fallback on older systems.
 
-Requirements: a decrypted supported device IPA, selected Xcode with iPhoneOS SDK
-27.1 or later, and enough zeroed Mach-O header padding. The manifest declares
+Requirements: Python 3.10+, a decrypted supported device IPA, the included
+`native/prebuilt/` bundles, and enough zeroed Mach-O header padding. Patching
+works on macOS and Windows; rebuilding the libraries requires macOS with Xcode
+and an iPhoneOS SDK of 27.1 or later. The manifest declares
 the required Qt class strings and rejects an existing scene manifest. Always
 start with an unpatched archive. Signing with a development identity remains a
 separate step; linker ad-hoc seals on new dylibs do not authorize installation.
@@ -75,13 +78,16 @@ python3 adapters/com.allenheath.SQU.MixPad/test_discovery.py
 python3 adapters/com.allenheath.SQU.MixPad/test_executable.py
 ```
 
-This compiles a temporary copy of the patcher and verifies top, side, reserved-side
-and forced-adapter outputs, SDK/minimum OS metadata, plist changes, load commands,
+The production-archive test runs the Python patcher and verifies top, side,
+reserved-side and forced-adapter outputs, SDK/minimum OS metadata, plist changes, load commands,
 input/resource/code preservation, import redirection, XML/DER entitlement removal
 and safe failures. `test_discovery.py` runs mocked socket tests with sanitizers
 and builds both device architectures; it sends no network traffic.
 `test_executable.py` checks all supported import formats, fat slices, DER
 preservation and codesign readback using temporary ad-hoc fixtures.
+On Windows use `py -3` instead of `python3`; `test_adapter.py` is portable.
+The socket/native and codesign tests require macOS and Xcode. To compare the
+original implementation, pass `--patcher patch-ipa-duo.swift` to `test_adapter.py`.
 `--keep-output NEW_DIRECTORY`
 retains the artifacts for review.
 

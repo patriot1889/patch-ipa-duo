@@ -292,7 +292,7 @@ def main():
         with tempfile.NamedTemporaryFile(dir=path.parent, delete=False) as output:
             temporary = output.name
             output.write(data)
-            os.fchmod(output.fileno(), stat.S_IMODE(info.st_mode))
+        os.chmod(temporary, stat.S_IMODE(info.st_mode))
         os.replace(temporary, path)
         temporary = None
     finally:

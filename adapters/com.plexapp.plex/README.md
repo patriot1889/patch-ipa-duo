@@ -2,7 +2,8 @@
 
 Supports `com.plexapp.plex`, version `2026.22.0`, build `2211`.
 
-Run these commands from the repository root:
+Run these commands from the repository root. On Windows replace
+`./patch-ipa-duo` with `py -3 .\patch-ipa-duo.py`:
 
 ```sh
 ./patch-ipa-duo inspect com.plexapp.plex-2026.22.0.ipa
@@ -27,8 +28,10 @@ Full mode defaults to existing system bar behavior (`--bars default`). Explicit
 `--bars top` and `--bars side` requests use the generic UIKit bar hook. The
 adapter supplies no native libraries or executable transformation of its own.
 
-Use a decrypted supported device IPA. Explicit bar overrides require a selected
-Xcode iPhoneOS SDK 27.1 or later and sufficient Mach-O header padding. Patched
+Use a decrypted supported device IPA. Explicit bar overrides use the included
+`native/prebuilt/` bundles and require sufficient Mach-O header padding. Both
+macOS and Windows use the same Python 3.10+ patcher. Rebuilding native libraries
+requires macOS with Xcode and an iPhoneOS SDK of 27.1 or later. Patched
 output retains stale signatures and is not ready for device installation.
 Structural validation does not verify launch, display behavior or casting on a
 physical device.

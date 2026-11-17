@@ -5,3 +5,6 @@
 /local-ios-sign.config.json
 /local-sign/
 .DS_Store
+
+__pycache__/
+*.py[cod]

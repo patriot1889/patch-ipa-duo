@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "libraries": {
+    "bars/top": {
+      "file": "bars/top.dylib",
+      "sourceHash": "40605baa4bf4dfc697046dcf9f0c98777b5b2114c46e41e0df3b94d2709ec8b5",
+      "sha256": "dc125fc2a5565401899ee9baa3e8978a816089388cc781d0a7958a437817b5eb"
+    },
+    "bars/side": {
+      "file": "bars/side.dylib",
+      "sourceHash": "610f397b00a78eb803303654ae224ec00b18732ca091ef6688cabc9d8e9022ad",
+      "sha256": "4f8fbe55dbe4e972f41682485d2d90883fc38af7be3cf45ad405d21756eb1af1"
+    },
+    "com.allenheath.SQU.MixPad/com.allenheath.SQU.MixPad.dylib": {
+      "file": "com.allenheath.SQU.MixPad/com.allenheath.SQU.MixPad.dylib",
+      "sourceHash": "5568cd046f0c0a39c0f384f9f45880f5a3f34afab668ac755c7e61eb48bdc75f",
+      "sha256": "6051e239d51e90ab3cdeeb3c7551aabba257ebe255b2920394c439e5e29a6f42"
+    },
+    "com.allenheath.SQU.MixPad/SQFind.dylib": {
+      "file": "com.allenheath.SQU.MixPad/SQFind.dylib",
+      "sourceHash": "02ae19e7d0c2b63c4527b5078a26de41a333e1d92ecd02dffa9c486d52c2d511",
+      "sha256": "612ad09824b262cd2749882fed3fb9c56420f32b9d12b929bedd434d9c0c340b"
+    }
+  }
+}

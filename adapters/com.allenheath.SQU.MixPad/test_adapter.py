@@ -8,6 +8,7 @@ import plistlib
 import shutil
 import struct
 import subprocess
+import sys
 import tempfile
 import zipfile
 
@@ -173,22 +174,24 @@ def main():
     manifest = json.loads((PACKAGE / "adapter.json").read_text())
     with tempfile.TemporaryDirectory(prefix="mixpad-adapter-tests-") as temporary:
         root = Path(temporary)
-        source = root / "patch-ipa-duo.swift"
-        shutil.copy2(args.patcher, source)
-        patcher = root / "patch-ipa-duo"
-        run("/usr/bin/xcrun", "swiftc", source, "-o", patcher)
-        shutil.copytree(PACKAGE, root / "adapters" / IDENTIFIER)
-        inspected = run(patcher, "inspect", ipa).stdout
+        if args.patcher.suffix == ".swift":
+            patcher_path = root / "patch-ipa-duo"
+            run("/usr/bin/xcrun", "swiftc", args.patcher.resolve(), "-o", patcher_path)
+            shutil.copytree(PACKAGE, root / "adapters" / IDENTIFIER)
+            patcher = [patcher_path]
+        else:
+            patcher = [sys.executable, args.patcher.resolve()]
+        inspected = run(*patcher, "inspect", ipa).stdout
         assert "automatic from bundle identifier" in inspected and "patch supported" in inspected
         modes = [("top", []), ("side", ["--bars", "side"]), ("reserved-side", ["--display", "reserved-side"])]
         for mode, options in modes:
             output = root / (mode + ".ipa")
-            patched = run(patcher, "patch", ipa, "--output", output, *options)
+            patched = run(*patcher, "patch", ipa, "--output", output, *options)
             expected = "27.0" if mode == "reserved-side" else "27.1"
             verify_output(input_files, output, manifest, expected, mode != "reserved-side", IDENTIFIER)
             assert "bars=" + ("system" if mode == "reserved-side" else mode) in patched.stdout
             existing = output.read_bytes()
-            run(patcher, "patch", ipa, "--output", output, *options, succeeds=False)
+            run(*patcher, "patch", ipa, "--output", output, *options, succeeds=False)
             assert output.read_bytes() == existing
         info_path = next(name for name in input_files if name.count("/") == 2 and name.endswith(".app/Info.plist"))
         info = plistlib.loads(input_files[info_path])
@@ -197,15 +200,15 @@ def main():
         wrong_build = root / "wrong-build.ipa"
         mutated_archive(ipa, wrong_build, {info_path: plistlib.dumps(unsupported)})
         failed = root / "failed.ipa"
-        response = run(patcher, "patch", wrong_build, "--output", failed, succeeds=False)
+        response = run(*patcher, "patch", wrong_build, "--output", failed, succeeds=False)
         assert "does not support this app version/build" in response.stderr and not failed.exists()
         missing_class = root / "missing-class.ipa"
         mutated_archive(ipa, missing_class, {executable: input_files[executable].replace(b"QUIWindow\0", b"XUIWindow\0")})
-        response = run(patcher, "patch", missing_class, "--output", failed, succeeds=False)
+        response = run(*patcher, "patch", missing_class, "--output", failed, succeeds=False)
         assert "required string QUIWindow is missing" in response.stderr and not failed.exists()
         missing_import = root / "missing-import.ipa"
         mutated_archive(ipa, missing_import, {executable: input_files[executable].replace(b"_sendmsg\0", b"_unknown\0")})
-        response = run(patcher, "patch", missing_import, "--output", failed, succeeds=False)
+        response = run(*patcher, "patch", missing_import, "--output", failed, succeeds=False)
         assert "Expected one original sendmsg import" in response.stderr and not failed.exists()
         malformed_der = bytearray(input_files[executable])
         signature_base, _ = macho(malformed_der)["signature"]
@@ -216,15 +219,15 @@ def main():
                 malformed_der[signature_base + offset + 8] = 0x71
         bad_entitlements = root / "malformed-entitlements.ipa"
         mutated_archive(ipa, bad_entitlements, {executable: malformed_der})
-        response = run(patcher, "patch", bad_entitlements, "--output", failed, succeeds=False)
+        response = run(*patcher, "patch", bad_entitlements, "--output", failed, succeeds=False)
         assert "Unsupported DER entitlement root" in response.stderr and not failed.exists()
         renamed_info = dict(info, CFBundleIdentifier="com.example.renamed")
         renamed = root / "renamed.ipa"
         mutated_archive(ipa, renamed, {info_path: plistlib.dumps(renamed_info)})
         forced = root / "forced.ipa"
-        run(patcher, "patch", renamed, "--output", forced, "--adapter", IDENTIFIER)
+        run(*patcher, "patch", renamed, "--output", forced, "--adapter", IDENTIFIER)
         verify_output(files(renamed), forced, manifest, "27.1", True, "com.example.renamed")
-        response = run(patcher, "patch", ipa, "--output", failed, "--display", "reserved-side", "--bars", "top", succeeds=False)
+        response = run(*patcher, "patch", ipa, "--output", failed, "--display", "reserved-side", "--bars", "top", succeeds=False)
         assert "requires --display full" in response.stderr and not failed.exists()
         assert hashlib.sha256(ipa.read_bytes()).digest() == input_hash
         if args.keep_output:
