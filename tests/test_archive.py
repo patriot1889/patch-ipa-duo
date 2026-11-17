@@ -5,6 +5,7 @@ import stat
 import struct
 import tempfile
 import unittest
+from unittest.mock import patch
 import zipfile
 
 from ipaduo.archive import Archive, safe_component, write_archive
@@ -15,6 +16,9 @@ def fixture(path: Path, entries: list[tuple[str, bytes, int]], *, compression=zi
     with zipfile.ZipFile(path, "w", allowZip64=False) as archive:
         for name, data, mode in entries:
             info = zipfile.ZipInfo(name)
+            # ZipInfo normalizes backslashes on Windows. Hostile fixtures must
+            # retain their literal names in both local and central ZIP records.
+            info.filename = name
             info.create_system = 3
             info.compress_type = compression
             info.external_attr = mode << 16
@@ -106,13 +110,15 @@ class ArchiveTests(unittest.TestCase):
         data[position + len("Payload/Example.app/")] = ord("Z")
         self.ipa.write_bytes(data)
         with self.assertRaisesRegex(Problem, "conflicting local"):
-            Archive(self.ipa)
+            with Archive(self.ipa):
+                pass
 
     def test_unexplained_prefix_is_rejected(self) -> None:
         self.basic()
         self.ipa.write_bytes(b"garbage" + self.ipa.read_bytes())
         with self.assertRaises(Problem):
-            Archive(self.ipa)
+            with Archive(self.ipa):
+                pass
 
     def test_unsupported_extra_field_is_rejected(self) -> None:
         self.basic()
@@ -127,12 +133,14 @@ class ArchiveTests(unittest.TestCase):
                          struct.unpack_from("<I", data, eocd + 12)[0] + 4)
         self.ipa.write_bytes(data)
         with self.assertRaisesRegex(Problem, "Unsupported ZIP extra"):
-            Archive(self.ipa)
+            with Archive(self.ipa):
+                pass
 
     def test_symlink_entry_is_rejected(self) -> None:
         fixture(self.ipa, [("Payload/Example.app/link", b"target", stat.S_IFLNK | 0o777)])
         with self.assertRaisesRegex(Problem, "link"):
-            Archive(self.ipa)
+            with Archive(self.ipa):
+                pass
 
     def test_case_and_normalization_collision_are_rejected(self) -> None:
         for first, second in (("File", "file"), ("caf\u00e9", "cafe\u0301")):
@@ -147,9 +155,20 @@ class ArchiveTests(unittest.TestCase):
             with self.subTest(name=name):
                 fixture(self.ipa, [(f"Payload/Example.app/{name}", b"x", stat.S_IFREG | 0o644)])
                 with self.assertRaisesRegex(Problem, "unsafe path"):
-                    Archive(self.ipa)
+                    with Archive(self.ipa):
+                        pass
         self.assertFalse(safe_component("NUL.txt"))
         self.assertTrue(safe_component("Info.plist"))
+
+    def test_fixture_preserves_backslashes_with_windows_zip_normalization(self) -> None:
+        name = "Payload/Example.app/a\\b"
+        with patch("zipfile.os.sep", "\\"):
+            fixture(self.ipa, [(name, b"x", stat.S_IFREG | 0o644)])
+        # Check raw bytes: a ZipFile reader may normalize the name as well.
+        self.assertEqual(self.ipa.read_bytes().count(name.encode("utf-8")), 2)
+        with self.assertRaisesRegex(Problem, "unsafe path"):
+            with Archive(self.ipa):
+                pass
 
     def test_layout_rejects_extra_root(self) -> None:
         fixture(self.ipa, [("Payload/Example.app/Info.plist", b"x", stat.S_IFREG | 0o644),
