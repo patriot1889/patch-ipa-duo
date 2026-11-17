@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 2,
+  "bundleIdentifier": "com.plexapp.plex",
+  "aliases": [],
+  "name": "Plex",
+  "supportedBuilds": [
+    { "version": "2026.22.0", "build": "2211" }
+  ],
+  "fullModeDefaultBars": "default",
+  "supportedFullModeBars": ["default", "top", "side"],
+  "plannedChanges": [
+    "Use the full-display SDK 27.1 patch with Plex's existing scenes and bundle identifiers.",
+    "Declare the _airplay._tcp Bonjour service used by Vizbee's Local Network check."
+  ],
+  "operations": {
+    "enableIPhone": false,
+    "removePlistKeys": [],
+    "setPlist": {
+      "NSBonjourServices": [
+        "_plexapi._tcp",
+        "_googlecast._tcp",
+        "_9AC194DC._googlecast._tcp",
+        "_4289C4E0._googlecast._tcp",
+        "_EB90125F._googlecast._tcp",
+        "_AED610A8._googlecast._tcp",
+        "_A1EB4E9D._googlecast._tcp",
+        "",
+        "_airplay._tcp"
+      ]
+    },
+    "requiresAbsentPlistKeys": [],
+    "requiredExecutableStrings": [],
+    "libraries": []
+  }
+}

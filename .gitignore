@@ -1,0 +1,7 @@
+/original IPAs/
+/patched IPAs/
+/research/
+*.mobileprovision
+/local-ios-sign.config.json
+/local-sign/
+.DS_Store

@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 2,
+  "bundleIdentifier": "com.allenheath.SQU.MixPad",
+  "aliases": [],
+  "name": "SQ MixPad",
+  "supportedBuilds": [
+    { "version": "1.60.1", "build": "1.60.1.92418" }
+  ],
+  "fullModeDefaultBars": "top",
+  "supportedFullModeBars": ["top", "side"],
+  "plannedChanges": [
+    "Enable iPhone support while retaining iPad support.",
+    "Remove UIRequiresFullScreen.",
+    "Add an application scene configuration and source-built Qt scene bridge.",
+    "Replace SQ Find broadcast discovery with bounded local IPv4 unicast discovery.",
+    "Remove the multicast entitlement from XML and DER signing metadata before separate signing."
+  ],
+  "operations": {
+    "enableIPhone": true,
+    "removePlistKeys": ["UIRequiresFullScreen"],
+    "setPlist": {
+      "UIApplicationSceneManifest": {
+        "UIApplicationSupportsMultipleScenes": false,
+        "UISceneConfigurations": {
+          "UIWindowSceneSessionRoleApplication": [
+            {
+              "UISceneConfigurationName": "MixPad",
+              "UISceneDelegateClassName": "MixPadSceneDelegate"
+            }
+          ]
+        }
+      }
+    },
+    "requiresAbsentPlistKeys": ["UIApplicationSceneManifest"],
+    "requiredExecutableStrings": ["QUIWindow", "QIOSDesktopManagerView", "QUIView", "QIOSViewController"],
+    "libraries": [
+      { "source": "scene.m", "fileName": "com.allenheath.SQU.MixPad.dylib" },
+      { "source": "discovery.m", "fileName": "SQFind.dylib" }
+    ],
+    "executableTransform": { "source": "patch-executable.py" }
+  }
+}
