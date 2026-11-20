@@ -25,6 +25,27 @@ Automatic selection uses the original bundle identifier. A renamed copy can use
 
 Version, build and executable preflight checks still apply.
 
+The adapter sets `UIFileSharingEnabled` and `LSSupportsOpeningDocumentsInPlace`
+to expose the app's entire `Documents` directory in Files under
+**On My iPhone/iPad > SQ MixPad** (the displayed name may differ after signing).
+This follows [Apple's local file-sharing configuration](https://developer.apple.com/documentation/fileprovider#Share-files-locally).
+The supported executable already resolves its saved-show directory to
+`Documents/Shows/SHOWS` and its working show to `Documents/CurrentShow`, so no path
+redirection or migration is needed. Static tracing confirms that its show-path
+builder calls Qt's Documents lookup, which resolves to
+`NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)`.
+
+After installing a signed build, launch MixPad and save an offline show to create
+its folder structure. Close MixPad before copying complete show folders into
+`Shows/SHOWS` through Files, then reopen MixPad to check its offline show list.
+Saved show folders use the name `SHOW` followed by four digits, such as
+`SHOW0000`; use a free number and include `SHOW.DAT` and all other contents.
+Keep the complete folder and its contents together; avoid replacing `CurrentShow`
+directly. This adds local folder access; opening a show by tapping it in Files
+still depends on MixPad's existing document handling. The Files-access build
+was signed, installed and launched on a physical Duo, and the user confirmed
+that the workflow works.
+
 The manifest enables iPhone while retaining iPad support, removes
 `UIRequiresFullScreen`, and adds a single application scene using
 `MixPadSceneDelegate`. Full mode defaults to top bars and accepts side placement.

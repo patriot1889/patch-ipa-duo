@@ -101,10 +101,13 @@ def verify_output(input_files, output, manifest, expected_sdk, bars, identifier)
     assert updated["CFBundleIdentifier"] == identifier
     assert updated["UIDeviceFamily"] == [1, 2]
     assert "UIRequiresFullScreen" not in updated
+    assert updated["UIFileSharingEnabled"] is True
+    assert updated["LSSupportsOpeningDocumentsInPlace"] is True
     assert updated["UIApplicationSceneManifest"] == manifest["operations"]["setPlist"]["UIApplicationSceneManifest"]
     assert updated["DTSDKName"] == "iphoneos" + expected_sdk
     assert updated["DTPlatformVersion"] == expected_sdk
-    changed_keys = {"UIApplicationSceneManifest", "UIDeviceFamily", "UIRequiresFullScreen", "DTSDKName", "DTPlatformVersion"}
+    changed_keys = {"UIApplicationSceneManifest", "UIDeviceFamily", "UIRequiresFullScreen", "DTSDKName", "DTPlatformVersion",
+                    "UIFileSharingEnabled", "LSSupportsOpeningDocumentsInPlace"}
     assert {k: v for k, v in info.items() if k not in changed_keys} == {k: v for k, v in updated.items() if k not in changed_keys}
     added = {app + "/Frameworks/" + library["fileName"] for library in manifest["operations"]["libraries"]}
     if bars:

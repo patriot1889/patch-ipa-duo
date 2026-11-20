@@ -11,6 +11,7 @@
   "plannedChanges": [
     "Enable iPhone support while retaining iPad support.",
     "Remove UIRequiresFullScreen.",
+    "Expose the app's Documents folder in Files for local show transfers.",
     "Add an application scene configuration and source-built Qt scene bridge.",
     "Replace SQ Find broadcast discovery with bounded local IPv4 unicast discovery.",
     "Remove the multicast entitlement from XML and DER signing metadata before separate signing."
@@ -19,6 +20,8 @@
     "enableIPhone": true,
     "removePlistKeys": ["UIRequiresFullScreen"],
     "setPlist": {
+      "UIFileSharingEnabled": true,
+      "LSSupportsOpeningDocumentsInPlace": true,
       "UIApplicationSceneManifest": {
         "UIApplicationSupportsMultipleScenes": false,
         "UISceneConfigurations": {
